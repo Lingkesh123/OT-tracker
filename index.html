@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b1624">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>My OT Tracker</title>
+<style>
+:root{
+  --navy:#0b1624;--navy2:#08111c;--blue:#4da3ff;--green:#39d98a;
+  --orange:#ff9f43;--red:#ff6b6b;--bg:#0f1720;--text:#e7eef7;
+  --muted:#9aacbd;--border:#2a3948
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);padding-bottom:24px}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:white;padding:18px 20px;position:sticky;top:0;z-index:20}
+.header-row{display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
+h1{margin:0;font-size:29px}.sub{margin-top:4px;opacity:.9}
+.controls{display:flex;gap:12px;flex-wrap:wrap}
+.controls label{font-size:12px;display:block;margin-bottom:4px}
+.controls input{border:1px solid #33485a;border-radius:10px;padding:11px 12px;font-size:16px;min-width:180px;background:#101820;color:var(--text)}
+main{max-width:1600px;margin:auto;padding:14px}
+.card{background:#17212b;border:1px solid var(--border);border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.28)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{padding:17px}.kpi .label{font-size:14px;font-weight:700}.kpi .value{font-size:28px;font-weight:800;margin-top:9px}
+.blue{background:#17304a}.cyan{background:#16343b}.green{background:#17352b}.orange{background:#3b2a1f}
+.red{background:#3a2227}.yellow{background:#3a321d}.purple{background:#2b2744}
+.section{padding:20px;margin-top:14px}.section h2{margin:0 0 18px;font-size:23px}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.quick{border:1px solid var(--border);border-radius:12px;padding:13px}
+.quick label{display:block;color:var(--muted);font-size:13px;margin-bottom:7px}
+.quick input{width:100%;padding:10px;border:1px solid var(--border);border-radius:9px;font-size:16px;background:#101820;color:var(--text)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+button{border:0;border-radius:10px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer}
+.primary{background:var(--blue);color:white}.secondary{background:#263544;color:#e7eef7}.danger{background:#3a1f24;color:#ff7b7b}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 14px;font-size:12px;color:var(--muted)}
+.dot{width:14px;height:14px;border-radius:4px;border:1px solid var(--border);display:inline-block;vertical-align:middle;margin-right:4px}
+.wd{background:#172b3d}.sat{background:#38311d}.sun{background:#3a2a22}.ph{background:#3a2227}.leave{background:#252b31}
+.table-wrap{max-height:560px;overflow:auto;border-radius:12px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;min-width:1050px}
+th{background:#1f5f91;color:white;text-align:left;padding:11px;position:sticky;top:0;z-index:2}
+td{padding:10px;border-bottom:1px solid var(--border)}
+tr.row-weekday td{background:#172b3d}
+tr.row-saturday td{background:#38311d}
+tr.row-sunday td{background:#3a2a22}
+tr.row-public-holiday td{background:#3a2227}
+tr.row-leave td{background:#252b31}
+td select,td input{width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;background:#17212b;font-size:14px}
+.actual-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:12px}
+.actual-grid input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-size:16px;background:#101820;color:var(--text)}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.summary{border:1px solid var(--border);border-radius:12px;padding:13px}
+.summary span{font-size:12px;color:var(--muted)}.summary strong{display:block;margin-top:5px;font-size:20px}
+.progress{height:24px;background:#263544;border-radius:10px;overflow:hidden;margin:10px 0}
+.progress>div{height:100%;background:var(--green);width:0}
+.status-line{margin-top:12px;font-size:18px}
+.install{display:none;background:#17304a;border:1px solid #315a7a;padding:12px;border-radius:12px;margin-bottom:12px}
+.install button{width:100%;margin-top:8px}
+@media(max-width:900px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .quick-grid{grid-template-columns:repeat(2,1fr)}
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  header{position:static}.controls{width:100%}.controls>div{flex:1}.controls input{min-width:0;width:100%}
+  .kpis{grid-template-columns:1fr 1fr}.kpi .value{font-size:22px}
+  .quick-grid{grid-template-columns:1fr 1fr}.actual-grid{grid-template-columns:1fr}
+  .summary-grid{grid-template-columns:1fr 1fr}.section{padding:14px}.section h2{font-size:20px}
+}
+</style>
+
+<style>
+select option{background:#101820;color:#e7eef7}
+input::placeholder{color:#71869a}
+::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.85}
+</style>
+
+
+<style>
+/* DARK MODE FORM VISIBILITY FIX */
+input,
+select,
+textarea {
+  color: #eaf2fb !important;
+  background-color: #101820 !important;
+  border-color: #33485a !important;
+  -webkit-text-fill-color: #eaf2fb !important;
+  color-scheme: dark;
+}
+
+input[type="number"],
+input[type="date"],
+input[type="month"] {
+  color: #eaf2fb !important;
+  background-color: #101820 !important;
+  -webkit-text-fill-color: #eaf2fb !important;
+}
+
+select {
+  color: #eaf2fb !important;
+  background-color: #101820 !important;
+  -webkit-text-fill-color: #eaf2fb !important;
+}
+
+select option {
+  color: #eaf2fb !important;
+  background-color: #101820 !important;
+}
+
+input::placeholder {
+  color: #8396a8 !important;
+  opacity: 1;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid #4da3ff !important;
+  outline-offset: 1px;
+  border-color: #4da3ff !important;
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.9;
+}
+</style>
+
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div><h1>MY OT TRACKER</h1><div class="sub">Monthly Plan vs Daily Actual</div></div>
+    <div class="controls">
+      <div><label>Month</label><input type="month" id="monthPicker"></div>
+      <div><label>OT Rate (RM/hour)</label><input type="number" id="otRate" min="0" step="0.01" value="20"></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="install" id="installBox">
+    <strong>Install OT Tracker on your phone</strong>
+    <button class="primary" id="installBtn">Install App</button>
+  </div>
+
+  <div class="kpis">
+    <div class="card kpi blue"><div class="label">Monthly Planned OT</div><div class="value" id="kpiPlan">0 hrs</div></div>
+    <div class="card kpi cyan"><div class="label">Planned OT Pay</div><div class="value" id="kpiPlannedPay">RM 0.00</div></div>
+    <div class="card kpi green"><div class="label">Actual OT</div><div class="value" id="kpiActual">0 hrs</div></div>
+    <div class="card kpi orange"><div class="label">Actual OT Pay</div><div class="value" id="kpiActualPay">RM 0.00</div></div>
+    <div class="card kpi red"><div class="label">Missed OT</div><div class="value" id="kpiMissedOT">0 hrs</div></div>
+    <div class="card kpi red"><div class="label">Missed OT Pay</div><div class="value" id="kpiMissedPay">RM 0.00</div></div>
+    <div class="card kpi yellow"><div class="label">Remaining Planned OT</div><div class="value" id="kpiRemainingOT">0 hrs</div></div>
+    <div class="card kpi purple"><div class="label">Remaining OT Pay</div><div class="value" id="kpiRemainingPay">RM 0.00</div></div>
+  </div>
+
+  <section class="card section">
+    <h2>Current Month Position</h2>
+    <div class="progress"><div id="progressBar"></div></div>
+    <div style="text-align:right;font-weight:800" id="progressPct">0%</div>
+    <div class="summary-grid">
+      <div class="summary"><span>Planned up to today</span><strong id="planToToday">0 hrs</strong></div>
+      <div class="summary"><span>Actual up to today</span><strong id="actualToToday">0 hrs</strong></div>
+      <div class="summary"><span>Maximum Month-End OT</span><strong id="maxMonthEndOT">0 hrs</strong></div>
+      <div class="summary"><span>Maximum Month-End OT Pay</span><strong id="maxMonthEndPay">RM 0.00</strong></div>
+      <div class="summary"><span>Missed OT</span><strong id="missedBox">0 hrs</strong></div>
+      <div class="summary"><span>Missed OT Pay</span><strong id="missedPayBox">RM 0.00</strong></div>
+    </div>
+    <div class="status-line">Status: <strong id="statusText">On Plan</strong></div>
+  </section>
+
+  <section class="card section">
+    <h2>Monthly OT Plan Setup</h2>
+    <div class="quick-grid">
+      <div class="quick"><label>Weekday OT Hours</label><input type="number" id="weekdayHours" value="3" min="0" step="0.5"></div>
+      <div class="quick"><label>Saturday OT Hours</label><input type="number" id="saturdayHours" value="8" min="0" step="0.5"></div>
+      <div class="quick"><label>Sunday OT Hours</label><input type="number" id="sundayHours" value="0" min="0" step="0.5"></div>
+      <div class="quick"><label>Public Holiday OT Hours</label><input type="number" id="phHours" value="8" min="0" step="0.5"></div>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="quickFillPlan()">Quick Fill Month</button>
+      <button class="secondary" onclick="saveMonthlyPlan()">Save Monthly Plan</button>
+      <button class="secondary" onclick="clearPlanOnly()">Clear Plan Only</button>
+    </div>
+    <div class="legend">
+      <span><i class="dot wd"></i>Weekday</span><span><i class="dot sat"></i>Saturday</span>
+      <span><i class="dot sun"></i>Sunday</span><span><i class="dot ph"></i>Public Holiday</span>
+      <span><i class="dot leave"></i>Leave</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th><th>Day</th><th>Day Type</th><th>Planned OT</th><th>Planned Pay</th>
+          <th>Actual OT</th><th>Actual Pay</th><th>Variance</th><th>Status</th>
+        </tr></thead>
+        <tbody id="plannerBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card section">
+    <h2>Update Today's Actual OT</h2>
+    <div class="actual-grid">
+      <input type="date" id="actualDate">
+      <input type="number" id="actualHours" min="0" step="0.5" placeholder="Actual OT hours">
+      <button class="primary" onclick="saveActual()">Save Actual</button>
+    </div>
+  </section>
+
+  <section class="card section">
+    <div class="actions">
+      <button class="secondary" onclick="exportCSV()">Export CSV</button>
+      <button class="danger" onclick="clearMonth()">Clear This Month</button>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+const STORAGE_KEY="monthly_ot_planner_mobile_fixed_v1";
+let state={otRates:{},dailyPlans:{},dailyActuals:{},dayTypes:{}};
+
+function loadState(){
+  const s=localStorage.getItem(STORAGE_KEY);
+  if(!s)return;
+  try{
+    const p=JSON.parse(s);
+    state={
+      otRates:p.otRates||{},
+      dailyPlans:p.dailyPlans||{},
+      dailyActuals:p.dailyActuals||{},
+      dayTypes:p.dayTypes||{}
+    };
+  }catch(e){console.error(e)}
+}
+function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function currentMonth(){return document.getElementById("monthPicker").value}
+function fmt(n){return Number(n||0).toFixed(1).replace(".0","")}
+function money(n){return "RM "+Number(n||0).toFixed(2)}
+function dateForDay(day){return currentMonth()+"-"+String(day).padStart(2,"0")}
+function daysInSelectedMonth(){const [y,m]=currentMonth().split("-").map(Number);return new Date(y,m,0).getDate()}
+function dayName(d){return new Date(d+"T00:00:00").toLocaleDateString("en-US",{weekday:"short"})}
+function nativeDayType(d){const x=new Date(d+"T00:00:00").getDay();return x===6?"Saturday":x===0?"Sunday":"Weekday"}
+function getDayType(d){return state.dayTypes[d]||nativeDayType(d)}
+function getRowClass(t){return t==="Saturday"?"row-saturday":t==="Sunday"?"row-sunday":t==="Public Holiday"?"row-public-holiday":t==="Leave"?"row-leave":"row-weekday"}
+
+function cutoffDay(){
+  const now=new Date();
+  const [y,m]=currentMonth().split("-").map(Number);
+  const sel=new Date(y,m-1,1), cur=new Date(now.getFullYear(),now.getMonth(),1);
+  if(sel<cur)return daysInSelectedMonth();
+  if(sel>cur)return 0;
+  return now.getDate();
+}
+function syncSettings(){
+  const m=currentMonth();
+  if(state.otRates[m]==null)state.otRates[m]=20;
+  document.getElementById("otRate").value=state.otRates[m];
+}
+function quickFillPlan(){
+  const wd=Number(document.getElementById("weekdayHours").value||0);
+  const sat=Number(document.getElementById("saturdayHours").value||0);
+  const sun=Number(document.getElementById("sundayHours").value||0);
+  const ph=Number(document.getElementById("phHours").value||0);
+  for(let i=1;i<=daysInSelectedMonth();i++){
+    const d=dateForDay(i),t=getDayType(d);
+    state.dailyPlans[d]=t==="Public Holiday"?ph:t==="Saturday"?sat:t==="Sunday"?sun:t==="Leave"?0:wd;
+  }
+  saveState();render();
+}
+function saveMonthlyPlan(){
+  document.querySelectorAll("#plannerBody tr").forEach(tr=>{
+    const d=tr.dataset.date;
+    state.dayTypes[d]=tr.querySelector(".day-type").value;
+    state.dailyPlans[d]=Number(tr.querySelector(".plan-input").value||0);
+  });
+  saveState();render();
+  alert("Monthly OT plan saved.");
+}
+function saveActual(){
+  const d=document.getElementById("actualDate").value;
+  const h=Number(document.getElementById("actualHours").value||0);
+  if(!d){alert("Please select a date.");return}
+  state.dailyActuals[d]=h;
+  if(d.slice(0,7)!==currentMonth()){
+    document.getElementById("monthPicker").value=d.slice(0,7);
+    syncSettings();
+  }
+  saveState();
+  document.getElementById("actualHours").value="";
+  render();
+}
+function render(){
+  if(!currentMonth())return;
+  const days=daysInSelectedMonth(),cut=cutoffDay(),rate=Number(state.otRates[currentMonth()]||0);
+  let totalPlan=0,totalActual=0,plannedToday=0,actualToday=0,futurePlan=0;
+  for(let i=1;i<=days;i++){
+    const d=dateForDay(i),p=Number(state.dailyPlans[d]||0),a=Number(state.dailyActuals[d]||0);
+    totalPlan+=p;totalActual+=a;
+    if(i<=cut){plannedToday+=p;actualToday+=a}else{futurePlan+=p}
+  }
+  const missed=Math.max(plannedToday-actualToday,0);
+  const remaining=futurePlan;
+  const achievement=plannedToday>0?(actualToday/plannedToday)*100:0;
+  const maxEnd=totalActual+remaining;
+
+  document.getElementById("kpiPlan").textContent=fmt(totalPlan)+" hrs";
+  document.getElementById("kpiPlannedPay").textContent=money(totalPlan*rate);
+  document.getElementById("kpiActual").textContent=fmt(totalActual)+" hrs";
+  document.getElementById("kpiActualPay").textContent=money(totalActual*rate);
+  document.getElementById("kpiMissedOT").textContent=fmt(missed)+" hrs";
+  document.getElementById("kpiMissedPay").textContent=money(missed*rate);
+  document.getElementById("kpiRemainingOT").textContent=fmt(remaining)+" hrs";
+  document.getElementById("kpiRemainingPay").textContent=money(remaining*rate);
+  document.getElementById("planToToday").textContent=fmt(plannedToday)+" hrs";
+  document.getElementById("actualToToday").textContent=fmt(actualToday)+" hrs";
+  document.getElementById("missedBox").textContent=fmt(missed)+" hrs";
+  document.getElementById("missedPayBox").textContent=money(missed*rate);
+  document.getElementById("maxMonthEndOT").textContent=fmt(maxEnd)+" hrs";
+  document.getElementById("maxMonthEndPay").textContent=money(maxEnd*rate);
+  document.getElementById("progressBar").style.width=Math.min(achievement,100)+"%";
+  document.getElementById("progressPct").textContent=achievement.toFixed(0)+"%";
+
+  const st=document.getElementById("statusText");
+  if(missed>0){st.textContent="Missed "+fmt(missed)+" hrs";st.style.color="#b42318"}
+  else if(actualToday>plannedToday){st.textContent="Above Plan by "+fmt(actualToday-plannedToday)+" hrs";st.style.color="#16794b"}
+  else{st.textContent="On Plan";st.style.color="#102a43"}
+
+  renderPlanner(days,rate);
+}
+function renderPlanner(days,rate){
+  const body=document.getElementById("plannerBody");
+  body.innerHTML="";
+  for(let i=1;i<=days;i++){
+    const d=dateForDay(i),type=getDayType(d),p=Number(state.dailyPlans[d]||0);
+    const has=Object.prototype.hasOwnProperty.call(state.dailyActuals,d);
+    const a=has?Number(state.dailyActuals[d]||0):null;
+    const v=a===null?null:a-p;
+    const status=a===null?"Not Updated":v>0?"Above Plan":v<0?"Missed":"On Plan";
+    const tr=document.createElement("tr");
+    tr.dataset.date=d;tr.className=getRowClass(type);
+    tr.innerHTML=`
+      <td>${d}</td><td>${dayName(d)}</td>
+      <td><select class="day-type">
+        <option ${type==="Weekday"?"selected":""}>Weekday</option>
+        <option ${type==="Saturday"?"selected":""}>Saturday</option>
+        <option ${type==="Sunday"?"selected":""}>Sunday</option>
+        <option ${type==="Public Holiday"?"selected":""}>Public Holiday</option>
+        <option ${type==="Leave"?"selected":""}>Leave</option>
+      </select></td>
+      <td><input class="plan-input" type="number" min="0" step="0.5" value="${p}"></td>
+      <td>${money(p*rate)}</td>
+      <td>${a===null?"-":fmt(a)+" hrs"}</td>
+      <td>${a===null?"-":money(a*rate)}</td>
+      <td>${v===null?"-":(v>0?"+":"")+fmt(v)+" hrs"}</td>
+      <td>${status}</td>`;
+    const sel=tr.querySelector(".day-type"),inp=tr.querySelector(".plan-input");
+    sel.addEventListener("change",()=>{
+      state.dayTypes[d]=sel.value;
+      tr.className=getRowClass(sel.value);
+      inp.value=sel.value==="Public Holiday"?Number(document.getElementById("phHours").value||0):
+                sel.value==="Saturday"?Number(document.getElementById("saturdayHours").value||0):
+                sel.value==="Sunday"?Number(document.getElementById("sundayHours").value||0):
+                sel.value==="Leave"?0:Number(document.getElementById("weekdayHours").value||0);
+      state.dailyPlans[d]=Number(inp.value||0);
+      saveState();render();
+    });
+    inp.addEventListener("change",()=>{
+      state.dailyPlans[d]=Number(inp.value||0);
+      state.dayTypes[d]=sel.value;
+      saveState();render();
+    });
+    body.appendChild(tr);
+  }
+}
+function clearPlanOnly(){
+  const m=currentMonth();if(!confirm("Clear only the OT plan for "+m+"?"))return;
+  for(const k of Object.keys(state.dailyPlans))if(k.startsWith(m))delete state.dailyPlans[k];
+  for(const k of Object.keys(state.dayTypes))if(k.startsWith(m))delete state.dayTypes[k];
+  saveState();render();
+}
+function clearMonth(){
+  const m=currentMonth();if(!confirm("Clear plan and actual OT for "+m+"?"))return;
+  for(const k of Object.keys(state.dailyPlans))if(k.startsWith(m))delete state.dailyPlans[k];
+  for(const k of Object.keys(state.dailyActuals))if(k.startsWith(m))delete state.dailyActuals[k];
+  for(const k of Object.keys(state.dayTypes))if(k.startsWith(m))delete state.dayTypes[k];
+  saveState();render();
+}
+function exportCSV(){
+  const rate=Number(state.otRates[currentMonth()]||0);
+  let csv="Date,Day,Day Type,Planned OT,Planned Pay,Actual OT,Actual Pay,Variance,Status\n";
+  for(let i=1;i<=daysInSelectedMonth();i++){
+    const d=dateForDay(i),t=getDayType(d),p=Number(state.dailyPlans[d]||0);
+    const has=Object.prototype.hasOwnProperty.call(state.dailyActuals,d);
+    const a=has?Number(state.dailyActuals[d]||0):"",v=has?Number(a)-p:"";
+    const status=!has?"Not Updated":v>0?"Above Plan":v<0?"Missed":"On Plan";
+    csv+=[d,dayName(d),t,p,(p*rate).toFixed(2),a,has?(Number(a)*rate).toFixed(2):"",v,status].join(",")+"\n";
+  }
+  const blob=new Blob([csv],{type:"text/csv"}),link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);link.download="OT_"+currentMonth()+".csv";link.click();URL.revokeObjectURL(link.href);
+}
+
+loadState();
+const now=new Date();
+const localMonth=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+const localDate=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
+document.getElementById("monthPicker").value=localMonth;
+document.getElementById("actualDate").value=localDate;
+syncSettings();
+render();
+
+document.getElementById("monthPicker").addEventListener("change",()=>{
+  syncSettings();
+  const m=currentMonth();
+  document.getElementById("actualDate").value=m+"-01";
+  render();
+});
+document.getElementById("otRate").addEventListener("input",e=>{
+  state.otRates[currentMonth()]=Number(e.target.value||0);
+  saveState();render();
+});
+
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById("installBox").style.display="block";
+});
+document.getElementById("installBtn").addEventListener("click",async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();await deferredPrompt.userChoice;
+  deferredPrompt=null;document.getElementById("installBox").style.display="none";
+});
+if("serviceWorker" in navigator && location.protocol!=="file:"){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.error));
+}
+</script>
+</body>
+</html>

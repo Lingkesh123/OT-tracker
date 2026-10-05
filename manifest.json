@@ -1,0 +1,22 @@
+{
+  "name": "My OT Tracker Dark",
+  "short_name": "OT Tracker",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f1720",
+  "theme_color": "#0b1624",
+  "description": "Personal OT plan vs actual tracker - dark mode",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
